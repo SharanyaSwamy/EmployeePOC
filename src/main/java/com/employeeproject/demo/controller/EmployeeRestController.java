@@ -1,6 +1,7 @@
 package com.employeeproject.demo.controller;
 
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,55 +13,52 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import javax.validation.Valid;
 
 import com.employeeproject.demo.entity.Employee;
 import com.employeeproject.demo.service1.EmployeeService;
+import com.employeeproject.demo.exception.ResourceNotFoundException;
 
 @RestController
-//@RequestMapping("/api")
+@RequestMapping("/api")
 public class EmployeeRestController {
 	
 	@Autowired
 	 private EmployeeService employeeService;
 	  
-	 public void setEmployeeService(EmployeeService employeeService) {
+	/* public void setEmployeeService(EmployeeService employeeService) {
 	  this.employeeService = employeeService;
-	 }
+	 }*/
 	 
-	 @GetMapping("/api/employees")
+	 @GetMapping("/employees")
 	 public List<Employee> getEmployees() {
-	  List<Employee> employees = employeeService.retrieveEmployees();
-	  return employees;
+	  return employeeService.retrieveEmployees();
 	 }
 	  
-	 @GetMapping("/api/employees/{employeeId}")
-	 public Employee getEmployee(@PathVariable(name="employeeId")Long employeeId) {
-	  return employeeService.getEmployee(employeeId);
+	 @GetMapping("/employees/{employeeId}")
+	 public ResponseEntity < Employee > getEmployee(@PathVariable(value="employeeId")Long employeeId) throws ResourceNotFoundException {
+	     Employee employee = employeeService.getEmployee(employeeId).orElseThrow(() -> new ResourceNotFoundException("Employye not found for this id :: " + employeeId));
+	        return ResponseEntity.ok().body(employee);
 	 }
 	  
-	 @PostMapping("/api/employees")
-	 public void saveEmployee(@RequestBody Employee employee){
+	 @PostMapping("/employees")
+	 public Employee saveEmployee(@Valid @RequestBody Employee employee){
+	// public Employee saveEmployee(Employee employee){
 		// employeeService.saveEmployee(new Employee(employee.getId(),employee.getName(),employee.getSalary(),employee.getDepartment()))
-	  employeeService.saveEmployee(employee);
-	  System.out.println("Employee Saved Successfully");
+	  return employeeService.saveEmployee(employee);
+	  //System.out.println("Employee Saved Successfully");
 	 }
 	  
-	 @DeleteMapping("/api/employees/{employeeId}")
-	 public void deleteEmployee(@PathVariable(name="employeeId")Long employeeId){
-	  employeeService.deleteEmployee(employeeId);
-	  System.out.println("Employee Deleted Successfully");
+	 @DeleteMapping("/employees/{employeeId}")
+	 public Map < String, Boolean > deleteEmployee(@PathVariable(value="employeeId")Long employeeId) throws ResourceNotFoundException{
+	  return employeeService.deleteEmployee(employeeId);
+	  //System.out.println("Employee Deleted Successfully");
 	 }
 	  
-	 @PutMapping("/api/employees/{employeeId}")
-	 public void updateEmployee(@RequestBody Employee employee,
-	   @PathVariable(name="employeeId")Long employeeId){
-	  Employee emp = employeeService.getEmployee(employeeId);
-	  if(emp != null){
-	   employeeService.updateEmployee(employee);
-	  }
-	  else {
-		  employeeService.saveEmployee(employee);
-	  }
+	 @PutMapping("/employees/{employeeId}")
+	 public ResponseEntity <Employee> updateEmployee(@PathVariable(value ="employeeId") Long employeeId, @Valid @RequestBody Employee employeeDetails) throws ResourceNotFoundException{
+	  Employee emp = employeeService.updateEmployee(employeeId,employeeDetails);
+	  return ResponseEntity.ok(emp);
 	   
 	 }
 
