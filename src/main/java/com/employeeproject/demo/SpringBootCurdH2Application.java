@@ -19,7 +19,7 @@ public class SpringBootCurdH2Application {
 	 @Bean
 	    public RestTemplate restTemplate(RestTemplateBuilder builder) {
 	        return builder.build();
-	    }
+	    } 
 
 	public static void main(String[] args) {
 		SpringApplication.run(SpringBootCurdH2Application.class, args);
